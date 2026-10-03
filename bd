@@ -1,0 +1,50 @@
+CREATE DATABASE IF NOT EXISTS fashion_db CHARACTER SET utf8mb4;
+USE fashion_db;
+
+CREATE TABLE collections (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    name VARCHAR(100) NOT NULL UNIQUE,
+    description TEXT
+);
+
+CREATE TABLE models (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    name VARCHAR(150) NOT NULL,
+    category VARCHAR(50),           -- платье, брюки, куртка...
+    season VARCHAR(30),             -- лето/зима/демисезон
+    color_hex VARCHAR(7),           -- #RRGGBB
+    fabric VARCHAR(100),
+    price DECIMAL(10,2),
+    description TEXT,
+    image_path VARCHAR(255),
+    collection_id INT NULL,
+    is_favorite TINYINT(1) DEFAULT 0,
+    created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (collection_id) REFERENCES collections(id) ON DELETE SET NULL
+);
+
+
+
+
+
+
+CREATE TABLE designs (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    model_id INT NULL,                 -- связь с моделью (models.id)
+    name VARCHAR(150) NOT NULL,
+    template VARCHAR(50) NOT NULL,      -- 'classic_tee', 'hoodie'...
+    product_color VARCHAR(30) DEFAULT 'white',
+    canvas_json LONGTEXT,               -- сериализованный холст (объекты)
+    preview_path VARCHAR(255),          -- PNG превью
+    created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (model_id) REFERENCES models(id) ON DELETE SET NULL
+);
+
+CREATE TABLE design_objects (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    design_id INT NOT NULL,
+    obj_type VARCHAR(20) NOT NULL,      -- 'image' | 'text'
+    payload LONGTEXT NOT NULL,          -- JSON: координаты, размер, содержимое
+    z_index INT DEFAULT 0,
+    FOREIGN KEY (design_id) REFERENCES designs(id) ON DELETE CASCADE
+);
